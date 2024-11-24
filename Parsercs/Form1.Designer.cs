@@ -1293,7 +1293,7 @@
             "Золотистый",
             "Коричневый",
             "Фиолетовый"});
-            this.comboBox5.Location = new System.Drawing.Point(12, 937);
+            this.comboBox5.Location = new System.Drawing.Point(339, 630);
             this.comboBox5.Name = "comboBox5";
             this.comboBox5.Size = new System.Drawing.Size(274, 28);
             this.comboBox5.TabIndex = 24;
@@ -1301,7 +1301,7 @@
             // label14
             // 
             this.label14.AutoSize = true;
-            this.label14.Location = new System.Drawing.Point(8, 896);
+            this.label14.Location = new System.Drawing.Point(335, 585);
             this.label14.Name = "label14";
             this.label14.Size = new System.Drawing.Size(45, 20);
             this.label14.TabIndex = 23;
@@ -1319,7 +1319,7 @@
             // textBox3
             // 
             this.textBox3.BackColor = System.Drawing.SystemColors.Info;
-            this.textBox3.Location = new System.Drawing.Point(12, 820);
+            this.textBox3.Location = new System.Drawing.Point(339, 510);
             this.textBox3.Name = "textBox3";
             this.textBox3.Size = new System.Drawing.Size(274, 25);
             this.textBox3.TabIndex = 21;
@@ -1328,7 +1328,7 @@
             // label12
             // 
             this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(8, 793);
+            this.label12.Location = new System.Drawing.Point(335, 469);
             this.label12.Name = "label12";
             this.label12.Size = new System.Drawing.Size(72, 20);
             this.label12.TabIndex = 20;
@@ -1559,7 +1559,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1141, 932);
+            this.ClientSize = new System.Drawing.Size(1141, 1061);
             this.Controls.Add(this.panel1);
             this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;

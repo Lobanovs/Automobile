@@ -12,22 +12,27 @@ namespace Parsercs
 {
     public partial class Form3 : Form
     {
-        public Form3()
+        private int _userId;  // Хранение ID пользователя
+
+        public Form3(int userId)
         {
             InitializeComponent();
+            _userId = userId;  // Сохраняем ID пользователя
+        }
+        private void Form3_Load(object sender, EventArgs e)
+        {
+            // Пример использования _userId для загрузки данных пользователя
+            MessageBox.Show($"Добро пожаловать, ваш ID: {_userId}");
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
             {
-                // Скрываем текущую форму (форму 3)
                 this.Hide();
 
-                // Создаем новый экземпляр формы 2
-                Form2 form2 = new Form2();
-
-                // Отображаем форму 2
-                form2.Show();
+                // Открываем ленту машин
+                FormCars formCars = new FormCars(_userId);
+                formCars.Show();
             }
         }
 
@@ -36,7 +41,7 @@ namespace Parsercs
             this.Hide();
 
             // Создаем новый экземпляр формы 2
-            Form1 form1 = new Form1();
+            Form1 form1 = new Form1(_userId);
 
             // Отображаем форму 2
             form1.Show();

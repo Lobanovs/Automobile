@@ -8,7 +8,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Configuration;
-using MySql.Data.MySqlClient;
 using System.Data.SqlClient;
 using System.Reflection.Emit;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
@@ -20,14 +19,17 @@ namespace Parsercs
     {
         
         
-        private MySqlConnection connection;
-        private string connectionString = "Server=sql7.freesqldatabase.com;Port=3306;Database=sql7710165;Uid=sql7710165;Pwd=kpl4jFAWA6;Charset=utf8;"; 
+        private SqlConnection connection;
+        private string connectionString = @"Server=HOME-PC;Database=Automobile;Trusted_Connection=true;MultipleActiveResultSets=true;TrustServerCertificate=true;encrypt=false";
 
         Dictionary<string, List<string>> carModels = new Dictionary<string, List<string>>();
 
-        public Form1()
+        public int CurrentUserId { get; set; }  // ID текущего пользователя, который авторизовался
+
+        public Form1(int userId)  // Передаем ID пользователя при открытии формы
         {
             InitializeComponent();
+            CurrentUserId = userId;
 
             carModels.Add("BMW", new List<string> { "X5", "3 Series", "5 Series" });
             carModels.Add("Mercedes", new List<string> { "C-Class", "E-Class", "S-Class" });
@@ -61,7 +63,7 @@ namespace Parsercs
             // TODO: данная строка кода позволяет загрузить данные в таблицу "database1DataSet.Auto". При необходимости она может быть перемещена или удалена.
             
             
-            connection = new MySqlConnection(connectionString);
+            connection = new SqlConnection(connectionString);
 
             connection.Open();
 
@@ -69,60 +71,52 @@ namespace Parsercs
 
         private void button1_Click(object sender, EventArgs e)
         {
-            bool isValid = true; // Переменная для отслеживания выполнения всех условий
+            bool isValid = true;
 
             if (comboBox1.SelectedItem == null)
             {
                 MessageBox.Show("Сначала выберите Город!");
                 isValid = false;
             }
-      
 
-            if (comboBox2.SelectedItem == null && comboBox3.SelectedItem == null)
+            if (comboBox2.SelectedItem == null || comboBox3.SelectedItem == null)
             {
                 MessageBox.Show("Сначала выберите Марку и модель");
                 isValid = false;
             }
-           
 
             if (textBox1.Text == "")
             {
                 MessageBox.Show("Введите цену ");
                 isValid = false;
             }
- 
+
             if (textBox2.Text == "")
             {
                 MessageBox.Show("Введите описание ");
                 isValid = false;
             }
-           
 
             if (comboBox4.SelectedItem == null)
             {
                 MessageBox.Show("Введите год выпуска ");
                 isValid = false;
             }
-            
 
             if (textBox3.Text == "")
             {
                 MessageBox.Show("Введите пробег ");
                 isValid = false;
             }
-            
 
             if (comboBox5.SelectedItem == null)
             {
                 MessageBox.Show("Введите цвет");
                 isValid = false;
             }
-          
 
-            // Проверяем, все ли условия выполнены
             if (isValid)
             {
-                // Записываем значения во все label
                 label1.Text = comboBox1.SelectedItem.ToString();
                 label4.Text = comboBox2.SelectedItem.ToString() + " " + comboBox3.SelectedItem.ToString();
                 label8.Text = textBox1.Text;
@@ -130,27 +124,36 @@ namespace Parsercs
                 label11.Text = comboBox4.SelectedItem.ToString();
                 label13.Text = textBox3.Text;
                 label15.Text = comboBox5.SelectedItem.ToString();
-     
 
-                string query = "INSERT INTO Aut (City, Mark, Model, Price, description, YearOfIssue, Mileage, Color) VALUES (@City, @Mark, @Model, @Price, @description, @YearOfIssue, @Mileage, @Color)";
-                MySqlCommand command = new MySqlCommand(query, connection);
+                // Запрос на добавление автомобиля, включая UserId
+                string query = "INSERT INTO Aut (City, Mark, Model, Price, description, YearOfIssue, Mileage, Color, UserId) " +
+                               "VALUES (@City, @Mark, @Model, @Price, @description, @YearOfIssue, @Mileage, @Color, @UserId)";
+                SqlCommand command = new SqlCommand(query, connection);
 
-                command.Parameters.AddWithValue("City", comboBox1.SelectedItem.ToString());
-                command.Parameters.AddWithValue("Mark", comboBox2.SelectedItem.ToString());
-                command.Parameters.AddWithValue("Model", comboBox3.SelectedItem.ToString());
-                command.Parameters.AddWithValue("Price", textBox1.Text);
-                command.Parameters.AddWithValue("description", textBox2.Text);
-                command.Parameters.AddWithValue("YearOfIssue", comboBox4.SelectedItem.ToString());
-                command.Parameters.AddWithValue("Mileage", textBox3.Text);
-                command.Parameters.AddWithValue("Color", comboBox5.SelectedItem.ToString());
+                command.Parameters.AddWithValue("@City", comboBox1.SelectedItem.ToString());
+                command.Parameters.AddWithValue("@Mark", comboBox2.SelectedItem.ToString());
+                command.Parameters.AddWithValue("@Model", comboBox3.SelectedItem.ToString());
+                command.Parameters.AddWithValue("@Price", textBox1.Text);
+                command.Parameters.AddWithValue("@description", textBox2.Text);
+                command.Parameters.AddWithValue("@YearOfIssue", comboBox4.SelectedItem.ToString());
+                command.Parameters.AddWithValue("@Mileage", textBox3.Text);
+                command.Parameters.AddWithValue("@Color", comboBox5.SelectedItem.ToString());
+                command.Parameters.AddWithValue("@UserId", CurrentUserId);  // Передаем UserId текущего пользователя
 
-
-                MessageBox.Show(command.ExecuteNonQuery().ToString());
-                MessageBox.Show("Данные успешно сохранены!");
+                try
+                {
+                    command.ExecuteNonQuery();
+                    MessageBox.Show("Данные успешно сохранены!");
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Ошибка при подключении к базе данных: " + ex.Message);
+                }
             }
         }
+    
 
-        private void textBox1_KeyPress(object sender, KeyPressEventArgs e)
+    private void textBox1_KeyPress(object sender, KeyPressEventArgs e)
         {
             // Проверяем, является ли нажатая клавиша цифрой или клавишей Backspace
             if (!char.IsDigit(e.KeyChar) && e.KeyChar != (char)Keys.Back)
@@ -187,7 +190,7 @@ namespace Parsercs
              this.Close();
 
                 // Создаем новый экземпляр формы 2
-                Form3 form3 = new Form3();
+                Form3 form3 = new Form3(CurrentUserId);
 
                 // Отображаем форму 2
                 form3.Show();

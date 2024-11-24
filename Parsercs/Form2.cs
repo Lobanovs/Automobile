@@ -8,14 +8,14 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Data.SqlClient;
-using MySql.Data.MySqlClient;
+
 
 namespace Parsercs
 {
     public partial class Form2 : Form
     {
-        private MySqlConnection connection;
-        private string connectionString = "Server=sql7.freesqldatabase.com;Port=3306;Database=sql7710165;Uid=sql7710165;Pwd=kpl4jFAWA6;Charset=utf8;";
+        private SqlConnection connection;
+        private string connectionString = @"Server=HOME-PC;Database=Automobile;Trusted_Connection=true;MultipleActiveResultSets=true;TrustServerCertificate=true;encrypt=false";
         private DataTable dataTable; // Объявляем dataTable как поле класса
 
         Dictionary<string, List<string>> carModels = new Dictionary<string, List<string>>();
@@ -62,12 +62,12 @@ namespace Parsercs
         {
             try
             {
-                using (connection = new MySqlConnection(connectionString))
+                using (connection = new SqlConnection(connectionString))
                 {
                     connection.Open();
                     string query = "SELECT * FROM Aut";
-                    MySqlCommand command = new MySqlCommand(query, connection);
-                    MySqlDataAdapter adapter = new MySqlDataAdapter(command);
+                    SqlCommand command = new SqlCommand(query, connection);
+                    SqlDataAdapter adapter = new SqlDataAdapter(command);
                     dataTable = new DataTable(); // Инициализируем dataTable
                     adapter.Fill(dataTable);
                     dataGridView1.DataSource = dataTable;
@@ -131,13 +131,14 @@ namespace Parsercs
             }
             
         }
+        private int i;
 
         private void button2_Click(object sender, EventArgs e)
         {
                 this.Close();
 
                 // Создаем новый экземпляр формы 2
-                Form3 form3 = new Form3();
+                Form3 form3 = new Form3(i);
 
                 // Отображаем форму 2
                 form3.Show();
