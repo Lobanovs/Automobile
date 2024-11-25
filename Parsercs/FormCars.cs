@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
+﻿using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using System;
 
 namespace Parsercs
 {
@@ -17,8 +12,9 @@ namespace Parsercs
         private SqlConnection connection;
         private string connectionString = @"Server=HOME-PC;Database=Automobile;Trusted_Connection=true;MultipleActiveResultSets=true;TrustServerCertificate=true;encrypt=false";
 
-        // Добавляем FlowLayoutPanel в код
+        // Элементы интерфейса
         private FlowLayoutPanel flowLayoutPanelCars;
+        private ComboBox comboBoxCities;
 
         // Коллекция для хранения информации о машинах
         private List<CarInfo> carInfoList = new List<CarInfo>();
@@ -28,16 +24,53 @@ namespace Parsercs
             InitializeComponent();
             _userId = userId;
 
-            // Инициализация FlowLayoutPanel
+            // Настройка интерфейса
+            SetupUI();
+        }
+
+        private void SetupUI()
+        {
+            // Создаем ComboBox для фильтрации по городам
+            comboBoxCities = new ComboBox
+            {
+                Dock = DockStyle.Top,
+                DropDownStyle = ComboBoxStyle.DropDownList,
+                Font = new Font("Arial", 10),
+                Height = 30
+            };
+            comboBoxCities.SelectedIndexChanged += ComboBoxCities_SelectedIndexChanged;
+
+            // Создаем FlowLayoutPanel для отображения машин
             flowLayoutPanelCars = new FlowLayoutPanel
             {
-                Dock = DockStyle.Fill,  // Заполняем всю форму
-                AutoScroll = true,      // Возможность прокрутки
-                Padding = new Padding(10)  // Отступы
+                Dock = DockStyle.Fill,
+                AutoScroll = true,
+                Padding = new Padding(10)
             };
 
-            // Добавляем FlowLayoutPanel на форму
+            // Кнопка для возвращения в меню
+            Button backButton = new Button
+            {
+                Text = "В меню",
+                Dock = DockStyle.Top,
+                Height = 40,
+                Font = new Font("Arial", 12),
+                BackColor = Color.LightGray
+            };
+            backButton.Click += BackButton_Click;
+
+            // Добавляем элементы на форму
             Controls.Add(flowLayoutPanelCars);
+            Controls.Add(comboBoxCities);
+            Controls.Add(backButton);  // Добавляем кнопку "В меню"
+        }
+
+        private void BackButton_Click(object sender, EventArgs e)
+        {
+            // Открываем форму меню (например, Form3) и закрываем текущую форму
+            Form3 menuForm = new Form3(_userId);
+            menuForm.Show();
+            this.Close();
         }
 
         private void FormCars_Load(object sender, EventArgs e)
@@ -45,61 +78,39 @@ namespace Parsercs
             connection = new SqlConnection(connectionString);
             connection.Open();
 
-            // Загружаем данные о машинах в FlowLayoutPanel
+            // Загружаем данные о машинах и список городов
             LoadCars();
+            LoadCities();
         }
 
-        private void LoadCars()
+        private void LoadCars(string cityFilter = null)
         {
-            // SQL запрос для получения всех машин и информации о владельце
+            // Очищаем FlowLayoutPanel и список машин
+            flowLayoutPanelCars.Controls.Clear();
+            carInfoList.Clear();
+
+            // SQL запрос для получения машин
             string query = "SELECT Aut.ID, Aut.City, Aut.Mark, Aut.Model, Aut.Price, Aut.Description, " +
-                           "Aut.YearOfIssue, Aut.Mileage, Aut.Color, Users.Username, Users.Email, Users.PhoneNumber " +
+                           "Aut.YearOfIssue, Aut.Mileage, Aut.Color, Aut.ImagePath, " + // Добавлено поле ImagePath
+                           "Users.Username, Users.Email, Users.PhoneNumber " +
                            "FROM Aut " +
                            "JOIN Users ON Aut.UserId = Users.ID";
 
+            if (!string.IsNullOrEmpty(cityFilter))
+            {
+                query += " WHERE Aut.City = @City";
+            }
+
             SqlCommand command = new SqlCommand(query, connection);
+            if (!string.IsNullOrEmpty(cityFilter))
+            {
+                command.Parameters.AddWithValue("@City", cityFilter);
+            }
+
             SqlDataReader reader = command.ExecuteReader();
 
-            // Для каждой машины создаем панель
             while (reader.Read())
             {
-                // Создание панели для каждой машины
-                Panel carPanel = new Panel
-                {
-                    Width = 300,            // Ширина панели
-                    Height = 250,           // Высота панели
-                    BorderStyle = BorderStyle.FixedSingle,  // Рамка вокруг карточки
-                    Margin = new Padding(10)  // Отступы для панели
-                };
-
-                // Создаем метку для отображения информации о машине
-                Label carInfoLabel = new Label
-                {
-                    Text = $"{reader["Mark"]} {reader["Model"]}\n" +
-                           $"Цена: {reader["Price"]}\n" +
-                           $"Год выпуска: {reader["YearOfIssue"]}\n" +
-                           $"Пробег: {reader["Mileage"]}\n" +
-                           $"Цвет: {reader["Color"]}\n" +
-                           $"Описание: {reader["Description"]}",
-                    AutoSize = true,   // Автоматическая ширина метки в зависимости от содержимого
-                    Padding = new Padding(20)
-                };
-                
-                // Создаем метку для владельца машины
-                Label ownerInfoLabel = new Label
-                {
-                    Text = $"Владелец: {reader["Username"]}\n" +
-                           $"Email: {reader["Email"]}\n" +
-                           $"Телефон: {reader["PhoneNumber"]}",
-                    AutoSize = true,
-                    Padding = new Padding(5)
-                };
-
-                // Добавляем метки на панель
-                carPanel.Controls.Add(carInfoLabel);
-                carPanel.Controls.Add(ownerInfoLabel);
-
-                // Сохраняем информацию о машине в список
                 var carInfo = new CarInfo
                 {
                     CarId = Convert.ToInt32(reader["ID"]),
@@ -112,30 +123,166 @@ namespace Parsercs
                     Description = reader["Description"].ToString(),
                     OwnerName = reader["Username"].ToString(),
                     OwnerEmail = reader["Email"].ToString(),
-                    OwnerPhone = reader["PhoneNumber"].ToString()
+                    OwnerPhone = reader["PhoneNumber"].ToString(),
+                    City = reader["City"].ToString(),
+                    ImagePath = reader["ImagePath"].ToString() // Добавлено поле для пути изображения
                 };
 
                 carInfoList.Add(carInfo);
 
-                // Добавляем обработчик события для клика по панели
-                carPanel.Click += (sender, e) =>
-                {
-                    // Получаем информацию о машине из списка
-                    CarInfo selectedCar = carInfoList.FirstOrDefault(c => c.CarId == carInfo.CarId);
-                    if (selectedCar != null)
-                    {
-                        // Передаем объект CarInfo в FormCarDetails
-                        //FormCarDetails formCarDetails = new FormCarDetails(selectedCar);
-                        //formCarDetails.Show();
-                    }
-                };
-
-
-                // Добавляем панель на FlowLayoutPanel
+                // Создаем карточку машины
+                var carPanel = CreateCarPanel(carInfo);
                 flowLayoutPanelCars.Controls.Add(carPanel);
             }
 
             reader.Close();
+        }
+
+        private void LoadCities()
+        {
+            // SQL запрос для получения списка городов
+            string query = "SELECT DISTINCT City FROM Aut";
+
+            SqlCommand command = new SqlCommand(query, connection);
+            SqlDataReader reader = command.ExecuteReader();
+
+            // Заполняем ComboBox
+            comboBoxCities.Items.Clear();
+            comboBoxCities.Items.Add("Все города");
+            while (reader.Read())
+            {
+                comboBoxCities.Items.Add(reader["City"].ToString());
+            }
+
+            reader.Close();
+
+            // Устанавливаем значение по умолчанию
+            comboBoxCities.SelectedIndex = 0;
+        }
+
+        private void ComboBoxCities_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            string selectedCity = comboBoxCities.SelectedItem.ToString();
+            if (selectedCity == "Все города")
+            {
+                LoadCars(); // Загружаем все машины
+            }
+            else
+            {
+                LoadCars(selectedCity); // Фильтруем по выбранному городу
+            }
+        }
+
+        private Panel CreateCarPanel(CarInfo carInfo)
+        {
+            var carPanel = new Panel
+            {
+                Width = 300,
+                Height = 400, // Высота панели
+                BorderStyle = BorderStyle.FixedSingle,
+                Margin = new Padding(10)
+            };
+
+            // Используем TableLayoutPanel для более гибкого размещения
+            var tableLayout = new TableLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                RowCount = 3, // Теперь 3 строки, одна для изображения, одна для информации и одна для кнопки
+                ColumnCount = 1,
+                RowStyles =
+        {
+            new RowStyle(SizeType.Percent, 40), // 40% для изображения
+            new RowStyle(SizeType.Percent, 40), // 40% для информации
+            new RowStyle(SizeType.Percent, 20)  // 20% для кнопки
+        },
+                AutoSize = true
+            };
+
+            // Панель для изображения
+            var imagePanel = new Panel
+            {
+                Dock = DockStyle.Fill,
+                Height = 150 // Высота изображения
+            };
+
+            var carImage = new PictureBox
+            {
+                Dock = DockStyle.Fill,
+                SizeMode = PictureBoxSizeMode.StretchImage
+            };
+
+            // Загружаем изображение
+            if (string.IsNullOrEmpty(carInfo.ImagePath))
+            {
+                carImage.Image = Image.FromFile("default_image_path.jpg"); // Путь к изображению по умолчанию
+            }
+            else
+            {
+                try
+                {
+                    carImage.Image = Image.FromFile(carInfo.ImagePath); // Попытка загрузить изображение из базы
+                }
+                catch (Exception)
+                {
+                    carImage.Image = Image.FromFile("default_image_path.jpg"); // Если ошибка, используем изображение по умолчанию
+                }
+            }
+
+            imagePanel.Controls.Add(carImage);
+
+            // Панель для текста
+            var infoPanel = new Panel
+            {
+                Dock = DockStyle.Fill,
+                Padding = new Padding(10)
+            };
+
+            var carLabel = new Label
+            {
+                Text = $"{carInfo.Mark} {carInfo.Model}\n" +
+                       $"Цена: {carInfo.Price} ₽\n" +
+                       $"Год выпуска: {carInfo.YearOfIssue}\n" +
+                       $"Пробег: {carInfo.Mileage} км\n" +
+                       $"Цвет: {carInfo.Color}\n" +
+                       $"Город: {carInfo.City}",
+                AutoSize = true,
+                Padding = new Padding(10)
+            };
+
+            infoPanel.Controls.Add(carLabel);
+
+            // Создаем кнопку для перехода на подробности автомобиля
+            var detailsButton = new Button
+            {
+                Text = "Подробнее",
+                Dock = DockStyle.Fill, // Кнопка будет занимать всю оставшуюся высоту
+                Height = 40,
+                Font = new Font("Arial", 10)
+            };
+
+            // Обработчик клика на кнопке
+            detailsButton.Click += (sender, e) =>
+            {
+                try
+                {
+                    FormCarDetails formCarDetails = new FormCarDetails(carInfo.CarId);
+                    formCarDetails.Show();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Ошибка при открытии формы: " + ex.Message);
+                }
+            };
+
+            // Добавляем панели в TableLayoutPanel
+            tableLayout.Controls.Add(imagePanel, 0, 0); // Изображение в первой строке
+            tableLayout.Controls.Add(infoPanel, 0, 1);  // Информация во второй строке
+            tableLayout.Controls.Add(detailsButton, 0, 2); // Кнопка в третьей строке
+
+            // Добавляем TableLayoutPanel в carPanel
+            carPanel.Controls.Add(tableLayout);
+
+            return carPanel;
         }
 
         private void FormCars_FormClosing(object sender, FormClosingEventArgs e)
@@ -158,10 +305,7 @@ namespace Parsercs
         public string OwnerName { get; set; }
         public string OwnerEmail { get; set; }
         public string OwnerPhone { get; set; }
+        public string City { get; set; }
+        public string ImagePath { get; set; } // Путь к изображению
     }
 }
-
-
-
-
-

@@ -21,8 +21,7 @@ namespace Parsercs
         }
         private void Form3_Load(object sender, EventArgs e)
         {
-            // Пример использования _userId для загрузки данных пользователя
-            MessageBox.Show($"Добро пожаловать, ваш ID: {_userId}");
+   
         }
 
         private void button1_Click(object sender, EventArgs e)
