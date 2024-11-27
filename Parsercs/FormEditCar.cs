@@ -30,6 +30,7 @@ namespace Parsercs
             InitializeComponent();
             _carId = carId;
             this.Text = "Редактировать машину";
+            this.StartPosition = FormStartPosition.CenterScreen; // Центрируем форму
             InitializeComponents();  // Сначала инициализируем компоненты
             LoadCarDetails();       // Затем загружаем данные о машине
         }
@@ -37,32 +38,51 @@ namespace Parsercs
         // Инициализация компонентов формы (текстовые поля и кнопки)
         private void InitializeComponents()
         {
+            // Настройки формы
+            this.BackColor = Color.WhiteSmoke;  // Фоновый цвет формы
+            this.ClientSize = new Size(600, 600);
+
+            // Настройка шрифта
+            Font defaultFont = new Font("Segoe UI", 10);
+
             // Инициализация текстовых полей
-            txtMark = new TextBox { Location = new System.Drawing.Point(100, 50), Width = 200, ReadOnly = true };
-            txtModel = new TextBox { Location = new System.Drawing.Point(100, 100), Width = 200, ReadOnly = true };  // Сделаем поле модели недоступным для редактирования
-            txtYearOfIssue = new TextBox { Location = new System.Drawing.Point(100, 150), Width = 200 };
-            txtPrice = new TextBox { Location = new System.Drawing.Point(100, 200), Width = 200 };
-            txtMileage = new TextBox { Location = new System.Drawing.Point(100, 250), Width = 200 };  // Пробег
+            txtMark = new TextBox { Location = new System.Drawing.Point(100, 50), Width = 200, ReadOnly = true, Font = defaultFont };
+            txtModel = new TextBox { Location = new System.Drawing.Point(100, 100), Width = 200, ReadOnly = true, Font = defaultFont };  // Сделаем поле модели недоступным для редактирования
+            txtYearOfIssue = new TextBox { Location = new System.Drawing.Point(100, 150), Width = 200, Font = defaultFont };
+            txtPrice = new TextBox { Location = new System.Drawing.Point(100, 200), Width = 200, Font = defaultFont };
+            txtMileage = new TextBox { Location = new System.Drawing.Point(100, 250), Width = 200, Font = defaultFont };  // Пробег
 
             // Инициализация ComboBox для выбора цвета
-            comboBoxColor = new ComboBox { Location = new System.Drawing.Point(100, 300), Width = 200 };
+            comboBoxColor = new ComboBox { Location = new System.Drawing.Point(100, 300), Width = 200, Font = defaultFont };
             comboBoxColor.Items.AddRange(new string[] { "Красный", "Синий", "Черный", "Белый", "Серый" });
 
             // Инициализация текстового поля для описания
-            txtDescription = new TextBox { Location = new System.Drawing.Point(100, 350), Width = 200, Multiline = true, Height = 100 };  // Описание
+            txtDescription = new TextBox { Location = new System.Drawing.Point(100, 350), Width = 200, Multiline = true, Height = 100, Font = defaultFont };  // Описание
 
             // Инициализация компонента для изображения
             pictureBoxCarImage = new PictureBox { Location = new System.Drawing.Point(350, 50), Width = 200, Height = 150, BorderStyle = BorderStyle.Fixed3D };
 
             // Кнопка для изменения изображения
-            btnChangeImage = new Button { Text = "Изменить изображение", Location = new System.Drawing.Point(350, 210), Width = 200 };
+            btnChangeImage = new Button { Text = "Изменить изображение", Location = new System.Drawing.Point(350, 210), Width = 200, Font = defaultFont };
+            btnChangeImage.BackColor = Color.FromArgb(41, 128, 185); // Цвет кнопки
+            btnChangeImage.ForeColor = Color.White; // Цвет текста на кнопке
+            btnChangeImage.FlatStyle = FlatStyle.Flat;
+            btnChangeImage.FlatAppearance.BorderSize = 0;
             btnChangeImage.Click += btnChangeImage_Click;
 
             // Инициализация кнопок
-            btnSave = new Button { Text = "Сохранить", Location = new System.Drawing.Point(100, 470), Width = 100 };
+            btnSave = new Button { Text = "Сохранить", Location = new System.Drawing.Point(100, 470), Width = 100, Font = defaultFont };
+            btnSave.BackColor = Color.SeaGreen;
+            btnSave.ForeColor = Color.White;
+            btnSave.FlatStyle = FlatStyle.Flat;
+            btnSave.FlatAppearance.BorderSize = 0;
             btnSave.Click += btnSave_Click;
 
-            btnCancel = new Button { Text = "Отменить", Location = new System.Drawing.Point(210, 470), Width = 100 };
+            btnCancel = new Button { Text = "Отменить", Location = new System.Drawing.Point(210, 470), Width = 100, Font = defaultFont };
+            btnCancel.BackColor = Color.DarkRed;
+            btnCancel.ForeColor = Color.White;
+            btnCancel.FlatStyle = FlatStyle.Flat;
+            btnCancel.FlatAppearance.BorderSize = 0;
             btnCancel.Click += btnCancel_Click;
 
             // Добавляем компоненты на форму
