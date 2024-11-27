@@ -1,12 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Drawing;
 using System.Windows.Forms;
-using System;
 
 namespace Parsercs
 {
-    public partial class FormCars : Form
+    public partial class FormMyCars : Form
     {
         private int _userId;
         private SqlConnection connection;
@@ -14,12 +14,11 @@ namespace Parsercs
 
         // Элементы интерфейса
         private FlowLayoutPanel flowLayoutPanelCars;
-        private ComboBox comboBoxCities;
 
         // Коллекция для хранения информации о машинах
         private List<CarInfo> carInfoList = new List<CarInfo>();
 
-        public FormCars(int userId)
+        public FormMyCars(int userId)
         {
             InitializeComponent();
             _userId = userId;
@@ -30,16 +29,6 @@ namespace Parsercs
 
         private void SetupUI()
         {
-            // Создаем ComboBox для фильтрации по городам
-            comboBoxCities = new ComboBox
-            {
-                Dock = DockStyle.Top,
-                DropDownStyle = ComboBoxStyle.DropDownList,
-                Font = new Font("Arial", 10),
-                Height = 30
-            };
-            comboBoxCities.SelectedIndexChanged += ComboBoxCities_SelectedIndexChanged;
-
             // Создаем FlowLayoutPanel для отображения машин
             flowLayoutPanelCars = new FlowLayoutPanel
             {
@@ -61,7 +50,6 @@ namespace Parsercs
 
             // Добавляем элементы на форму
             Controls.Add(flowLayoutPanelCars);
-            Controls.Add(comboBoxCities);
             Controls.Add(backButton);  // Добавляем кнопку "В меню"
         }
 
@@ -73,39 +61,28 @@ namespace Parsercs
             this.Close();
         }
 
-        private void FormCars_Load(object sender, EventArgs e)
+        private void FormMyCars_Load(object sender, EventArgs e)
         {
             connection = new SqlConnection(connectionString);
             connection.Open();
 
-            // Загружаем данные о машинах и список городов
+            // Загружаем данные о машинах
             LoadCars();
-            LoadCities();
         }
 
-        private void LoadCars(string cityFilter = null)
+        private void LoadCars()
         {
             // Очищаем FlowLayoutPanel и список машин
             flowLayoutPanelCars.Controls.Clear();
             carInfoList.Clear();
 
-            // SQL запрос для получения машин
-            string query = "SELECT Aut.ID, Aut.City, Aut.Mark, Aut.Model, Aut.Price, Aut.Description, " +
-                           "Aut.YearOfIssue, Aut.Mileage, Aut.Color, Aut.ImagePath, " + // Добавлено поле ImagePath
-                           "Users.Username, Users.Email, Users.PhoneNumber " +
-                           "FROM Aut " +
-                           "JOIN Users ON Aut.UserId = Users.ID";
-
-            if (!string.IsNullOrEmpty(cityFilter))
-            {
-                query += " WHERE Aut.City = @City";
-            }
+            // SQL запрос для получения машин пользователя
+            string query = "SELECT Aut.ID, Aut.Mark, Aut.Model, Aut.Price, Aut.YearOfIssue, Aut.Mileage, Aut.Color, " +
+                           "Aut.Description, Aut.ImagePath " +
+                           "FROM Aut WHERE Aut.UserId = @UserId";
 
             SqlCommand command = new SqlCommand(query, connection);
-            if (!string.IsNullOrEmpty(cityFilter))
-            {
-                command.Parameters.AddWithValue("@City", cityFilter);
-            }
+            command.Parameters.AddWithValue("@UserId", _userId);
 
             SqlDataReader reader = command.ExecuteReader();
 
@@ -121,11 +98,7 @@ namespace Parsercs
                     Mileage = reader["Mileage"].ToString(),
                     Color = reader["Color"].ToString(),
                     Description = reader["Description"].ToString(),
-                    OwnerName = reader["Username"].ToString(),
-                    OwnerEmail = reader["Email"].ToString(),
-                    OwnerPhone = reader["PhoneNumber"].ToString(),
-                    City = reader["City"].ToString(),
-                    ImagePath = reader["ImagePath"].ToString() // Добавлено поле для пути изображения
+                    ImagePath = reader["ImagePath"].ToString() // Путь к изображению
                 };
 
                 carInfoList.Add(carInfo);
@@ -138,47 +111,12 @@ namespace Parsercs
             reader.Close();
         }
 
-        private void LoadCities()
-        {
-            // SQL запрос для получения списка городов
-            string query = "SELECT DISTINCT City FROM Aut";
-
-            SqlCommand command = new SqlCommand(query, connection);
-            SqlDataReader reader = command.ExecuteReader();
-
-            // Заполняем ComboBox
-            comboBoxCities.Items.Clear();
-            comboBoxCities.Items.Add("Все города");
-            while (reader.Read())
-            {
-                comboBoxCities.Items.Add(reader["City"].ToString());
-            }
-
-            reader.Close();
-
-            // Устанавливаем значение по умолчанию
-            comboBoxCities.SelectedIndex = 0;
-        }
-
-        private void ComboBoxCities_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            string selectedCity = comboBoxCities.SelectedItem.ToString();
-            if (selectedCity == "Все города")
-            {
-                LoadCars(); // Загружаем все машины
-            }
-            else
-            {
-                LoadCars(selectedCity); // Фильтруем по выбранному городу
-            }
-        }
-
         private Panel CreateCarPanel(CarInfo carInfo)
         {
             var carPanel = new Panel
             {
                 Width = 300,
-                Height = 400, // Высота панели
+                Height = 400,
                 BorderStyle = BorderStyle.FixedSingle,
                 Margin = new Padding(10)
             };
@@ -187,14 +125,14 @@ namespace Parsercs
             var tableLayout = new TableLayoutPanel
             {
                 Dock = DockStyle.Fill,
-                RowCount = 3, // Теперь 3 строки, одна для изображения, одна для информации и одна для кнопки
+                RowCount = 3, // 3 строки: одна для изображения, одна для информации и одна для кнопок
                 ColumnCount = 1,
                 RowStyles =
-        {
-            new RowStyle(SizeType.Percent, 40), // 40% для изображения
-            new RowStyle(SizeType.Percent, 40), // 40% для информации
-            new RowStyle(SizeType.Percent, 20)  // 20% для кнопки
-        },
+                {
+                    new RowStyle(SizeType.Percent, 40), // 40% для изображения
+                    new RowStyle(SizeType.Percent, 40), // 40% для информации
+                    new RowStyle(SizeType.Percent, 20)  // 20% для кнопок
+                },
                 AutoSize = true
             };
 
@@ -243,41 +181,49 @@ namespace Parsercs
                        $"Цена: {carInfo.Price} ₽\n" +
                        $"Год выпуска: {carInfo.YearOfIssue}\n" +
                        $"Пробег: {carInfo.Mileage} км\n" +
-                       $"Цвет: {carInfo.Color}\n" +
-                       $"Город: {carInfo.City}",
+                       $"Цвет: {carInfo.Color}",
                 AutoSize = true,
                 Padding = new Padding(10)
             };
 
             infoPanel.Controls.Add(carLabel);
 
-            // Создаем кнопку для перехода на подробности автомобиля
-            var detailsButton = new Button
+            // Панель для кнопок
+            var buttonPanel = new Panel
             {
-                Text = "Подробнее",
-                Dock = DockStyle.Fill, // Кнопка будет занимать всю оставшуюся высоту
-                Height = 40,
-                Font = new Font("Arial", 10)
+                Dock = DockStyle.Fill,
+                Padding = new Padding(10)
             };
 
-            // Обработчик клика на кнопке
-            detailsButton.Click += (sender, e) =>
+            var btnDelete = new Button
             {
-                try
-                {
-                    FormCarDetails formCarDetails = new FormCarDetails(carInfo.CarId);
-                    formCarDetails.Show();
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Ошибка при открытии формы: " + ex.Message);
-                }
+                Text = "Удалить",
+                Dock = DockStyle.Left, // Кнопка будет занимать левую половину
+                Width = 120,
+                Height = 40,
+                BackColor = Color.Red,
+                ForeColor = Color.White
             };
+            btnDelete.Click += (sender, e) => DeleteCar(carInfo.CarId); // Обработчик для удаления машины
+
+            var btnEdit = new Button
+            {
+                Text = "Изменить",
+                Dock = DockStyle.Right, // Кнопка будет занимать правую половину
+                Width = 120,
+                Height = 40,
+                BackColor = Color.Blue,
+                ForeColor = Color.White
+            };
+            btnEdit.Click += (sender, e) => EditCar(carInfo.CarId); // Обработчик для редактирования машины
+
+            buttonPanel.Controls.Add(btnDelete);
+            buttonPanel.Controls.Add(btnEdit);
 
             // Добавляем панели в TableLayoutPanel
             tableLayout.Controls.Add(imagePanel, 0, 0); // Изображение в первой строке
             tableLayout.Controls.Add(infoPanel, 0, 1);  // Информация во второй строке
-            tableLayout.Controls.Add(detailsButton, 0, 2); // Кнопка в третьей строке
+            tableLayout.Controls.Add(buttonPanel, 0, 2); // Кнопки в третьей строке
 
             // Добавляем TableLayoutPanel в carPanel
             carPanel.Controls.Add(tableLayout);
@@ -285,7 +231,31 @@ namespace Parsercs
             return carPanel;
         }
 
-        private void FormCars_FormClosing(object sender, FormClosingEventArgs e)
+        private void DeleteCar(int carId)
+        {
+            var confirmResult = MessageBox.Show("Вы уверены, что хотите удалить эту машину?", "Удаление", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (confirmResult == DialogResult.Yes)
+            {
+                string query = "DELETE FROM Aut WHERE ID = @CarId";
+
+                using (var command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@CarId", carId);
+                    command.ExecuteNonQuery();
+                }
+
+                MessageBox.Show("Машина удалена.");
+                LoadCars(); // Перезагружаем список машин
+            }
+        }
+
+        private void EditCar(int carId)
+        {
+            FormEditCar formEditCar = new FormEditCar(carId);
+            formEditCar.Show();
+        }
+
+        private void FormMyCars_FormClosing(object sender, FormClosingEventArgs e)
         {
             connection.Close();
         }

@@ -50,5 +50,13 @@ namespace Parsercs
         {
             Application.Exit();
         }
+        private void button4_Click(object sender, EventArgs e)
+        {
+            this.Hide();
+
+            // Открываем форму с информацией о машинах пользователя
+            FormMyCars formMyCars = new FormMyCars(_userId);
+            formMyCars.Show();
+        }
     }
 }
