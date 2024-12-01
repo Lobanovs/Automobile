@@ -9,6 +9,7 @@ namespace Parsercs
     public partial class FormCars : Form
     {
         private int _userId;
+        private string _userRole;  // Добавляем переменную для роли пользователя
         private SqlConnection connection;
         private string connectionString = @"Server=HOME-PC;Database=Automobile;Trusted_Connection=true;MultipleActiveResultSets=true;TrustServerCertificate=true;encrypt=false";
 
@@ -19,10 +20,11 @@ namespace Parsercs
         // Коллекция для хранения информации о машинах
         private List<CarInfo> carInfoList = new List<CarInfo>();
 
-        public FormCars(int userId)
+        public FormCars(int userId, string userRole)  // Добавляем параметр userRole
         {
             InitializeComponent();
             _userId = userId;
+            _userRole = userRole;  // Инициализируем роль пользователя
 
             // Настройка интерфейса
             SetupUI();
@@ -67,11 +69,12 @@ namespace Parsercs
 
         private void BackButton_Click(object sender, EventArgs e)
         {
-            // Открываем форму меню (например, Form3) и закрываем текущую форму
-            Form3 menuForm = new Form3(_userId);
+            // Открываем форму меню (например, Form3) и передаем userId и userRole
+            Form3 menuForm = new Form3(_userId, _userRole);  // Передаем оба параметра
             menuForm.Show();
             this.Close();
         }
+
 
         private void FormCars_Load(object sender, EventArgs e)
         {

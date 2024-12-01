@@ -55,8 +55,9 @@ namespace Parsercs
 
         private void BackButton_Click(object sender, EventArgs e)
         {
-            // Открываем форму меню (например, Form3) и закрываем текущую форму
-            Form3 menuForm = new Form3(_userId);
+            // Получаем роль пользователя из базы данных
+            string userRole = GetUserRole(_userId);  // Получаем роль пользователя
+            Form3 menuForm = new Form3(_userId, userRole);  // Передаем userId и userRole
             menuForm.Show();
             this.Close();
         }
@@ -258,6 +259,24 @@ namespace Parsercs
         private void FormMyCars_FormClosing(object sender, FormClosingEventArgs e)
         {
             connection.Close();
+        }
+
+        // Метод для получения роли пользователя
+        private string GetUserRole(int userId)
+        {
+            string userRole = "user";  // Дефолтное значение
+            string query = "SELECT Role FROM Users WHERE ID = @UserId";  // Пример запроса для получения роли
+            SqlCommand command = new SqlCommand(query, connection);
+            command.Parameters.AddWithValue("@UserId", userId);
+
+            SqlDataReader reader = command.ExecuteReader();
+            if (reader.Read())
+            {
+                userRole = reader["Role"].ToString();  // Получаем роль из базы данных
+            }
+            reader.Close();
+
+            return userRole;
         }
     }
 }

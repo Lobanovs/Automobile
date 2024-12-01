@@ -22,7 +22,7 @@ namespace Parsercs
             connection.Open();
         }
 
-        // Хешируем пароль перед проверкой в базе данных
+        // Метод для хэширования пароля
         public string HashPassword(string password)
         {
             using (SHA256 sha256Hash = SHA256.Create())
@@ -32,24 +32,24 @@ namespace Parsercs
             }
         }
 
-        // Обработчик для кнопки Логин
+        // Обработчик кнопки "Логин"
         private void buttonLogin_Click(object sender, EventArgs e)
         {
-            string username = textBoxUsername.Text.Trim(); // Логин
-            string password = textBoxPassword.Text.Trim(); // Пароль
+            string username = textBoxUsername.Text.Trim();
+            string password = textBoxPassword.Text.Trim();
 
-            // Проверка ввода
+            // Проверка на пустой ввод
             if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
             {
                 MessageBox.Show("Введите логин и пароль!");
                 return;
             }
 
-            // Хэширование пароля, если используется (опционально)
+            // Хэширование пароля
             string hashedPassword = HashPassword(password);
 
-            // SQL-запрос для получения ID пользователя
-            string query = "SELECT ID FROM Users WHERE Username = @username AND Password = @password";
+            // Запрос для получения ID и роли пользователя
+            string query = "SELECT ID, Role FROM Users WHERE Username = @username AND Password = @password";
 
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
@@ -59,24 +59,26 @@ namespace Parsercs
                     using (SqlCommand command = new SqlCommand(query, connection))
                     {
                         command.Parameters.AddWithValue("@username", username);
-                        command.Parameters.AddWithValue("@password", hashedPassword); // Если используется хэширование
+                        command.Parameters.AddWithValue("@password", hashedPassword);
 
-                        object result = command.ExecuteScalar(); // Получаем ID пользователя
-
-                        if (result != null)
+                        using (SqlDataReader reader = command.ExecuteReader())
                         {
-                            int userId = Convert.ToInt32(result); // Преобразуем результат в int
-                            MessageBox.Show("Авторизация успешна!");
+                            if (reader.Read())
+                            {
+                                int userId = Convert.ToInt32(reader["ID"]);
+                                string userRole = reader["Role"].ToString();
 
-                            this.Hide();
+                                MessageBox.Show("Авторизация успешна!");
 
-                            // Передаем userId в следующую форму
-                            Form3 mainForm = new Form3(userId);
-                            mainForm.Show();
-                        }
-                        else
-                        {
-                            MessageBox.Show("Неверный логин или пароль!");
+                                // Переход в главное меню с передачей ID и роли
+                                this.Hide();
+                                Form3 mainForm = new Form3(userId, userRole);
+                                mainForm.Show();
+                            }
+                            else
+                            {
+                                MessageBox.Show("Неверный логин или пароль!");
+                            }
                         }
                     }
                 }
@@ -87,9 +89,7 @@ namespace Parsercs
             }
         }
 
-
-
-        // Переход на форму регистрации
+        // Обработчик кнопки "Регистрация"
         private void buttonRegister_Click(object sender, EventArgs e)
         {
             this.Hide();

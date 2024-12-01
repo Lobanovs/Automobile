@@ -13,6 +13,7 @@ namespace Parsercs
 
         private Dictionary<string, List<string>> carModels = new Dictionary<string, List<string>>();
         public int CurrentUserId { get; set; }
+        private string CurrentUserRole { get; set; }  // Добавление роли пользователя
 
         private string selectedImagePath;
         private PictureBox pictureBoxPreview;
@@ -21,10 +22,11 @@ namespace Parsercs
         private Button button1, btnSelectImage, buttonBackToMenu;
         private Label label1, label2, label3, label4, label5, label6, label7, label8, label9;
 
-        public Form1(int userId)
+        public Form1(int userId, string userRole)  // Добавление второго параметра для роли пользователя
         {
             InitializeComponent();
             CurrentUserId = userId;
+            CurrentUserRole = userRole;  // Инициализация роли пользователя
 
             // Добавляем модели машин для марок
             carModels.Add("BMW", new List<string> { "X5", "3 Series", "5 Series" });
@@ -166,7 +168,7 @@ namespace Parsercs
 
         private void BtnBackToMenu_Click(object sender, EventArgs e)
         {
-            Form3 menuForm = new Form3(CurrentUserId);
+            Form3 menuForm = new Form3(CurrentUserId, CurrentUserRole);  // Передача роли пользователя
             menuForm.Show();
             this.Close();
         }
@@ -200,15 +202,19 @@ namespace Parsercs
         private void Button1_Click(object sender, EventArgs e)
         {
             bool isValid = true;
-            if (comboBox1.SelectedItem == null) { MessageBox.Show("Сначала выберите Город!"); isValid = false; }
-            if (comboBox2.SelectedItem == null || comboBox3.SelectedItem == null) { MessageBox.Show("Сначала выберите Марку и модель"); isValid = false; }
-            if (textBox1.Text == "") { MessageBox.Show("Введите цену автомобиля"); isValid = false; }
-            if (selectedImagePath == "") { MessageBox.Show("Выберите изображение автомобиля!"); isValid = false; }
+            if (comboBox1.SelectedItem == null) { isValid = false; }
+            if (comboBox2.SelectedItem == null) { isValid = false; }
+            if (comboBox3.SelectedItem == null) { isValid = false; }
+            if (comboBox4.SelectedItem == null) { isValid = false; }
+            if (comboBox5.SelectedItem == null) { isValid = false; }
+            if (string.IsNullOrWhiteSpace(textBox1.Text)) { isValid = false; }
+            if (string.IsNullOrWhiteSpace(textBox2.Text)) { isValid = false; }
+            if (string.IsNullOrWhiteSpace(textBox3.Text)) { isValid = false; }
 
             if (isValid)
             {
                 string query = "INSERT INTO Aut (City, Mark, Model, Price, Description, YearOfIssue, Mileage, Color, UserId, ImagePath) " +
-                               "VALUES (@City, @Mark, @Model, @Price, @Description, @YearOfIssue, @Mileage, @Color, @UserId, @ImagePath)";
+               "VALUES (@City, @Mark, @Model, @Price, @Description, @YearOfIssue, @Mileage, @Color, @UserId, @ImagePath)";
 
                 SqlCommand command = new SqlCommand(query, connection);
 
@@ -230,7 +236,10 @@ namespace Parsercs
                 connection.Close();
 
                 MessageBox.Show("Машина добавлена!");
-
+            }
+            else
+            {
+                MessageBox.Show("Пожалуйста, заполните все поля.");
             }
         }
     }

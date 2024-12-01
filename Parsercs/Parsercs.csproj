@@ -68,7 +68,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CarInfo.cs" />
+    <Compile Include="Entity\CarInfo.cs" />
     <Compile Include="Database1DataSet.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -79,78 +79,90 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Database1DataSet1.xsd</DependentUpon>
     </Compile>
-    <Compile Include="Form1.cs">
+    <Compile Include="Car\Form1.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form1.Designer.cs">
+    <Compile Include="Car\Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
-    <Compile Include="Form3.cs">
+    <Compile Include="Menu\Form3.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form3.Designer.cs">
+    <Compile Include="Menu\Form3.Designer.cs">
       <DependentUpon>Form3.cs</DependentUpon>
     </Compile>
-    <Compile Include="FormCarDetails.cs">
+    <Compile Include="Car\FormCarDetails.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FormCarDetails.Designer.cs">
+    <Compile Include="Car\FormCarDetails.Designer.cs">
       <DependentUpon>FormCarDetails.cs</DependentUpon>
     </Compile>
-    <Compile Include="FormCars.cs">
+    <Compile Include="Car\FormCars.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FormCars.Designer.cs">
+    <Compile Include="Car\FormCars.Designer.cs">
       <DependentUpon>FormCars.cs</DependentUpon>
     </Compile>
-    <Compile Include="FormEditCar.cs">
+    <Compile Include="MyCar\FormEditCar.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FormEditCar.Designer.cs">
+    <Compile Include="MyCar\FormEditCar.Designer.cs">
       <DependentUpon>FormEditCar.cs</DependentUpon>
     </Compile>
-    <Compile Include="FormLogin.cs">
+    <Compile Include="Admin\FormEditUser.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FormLogin.Designer.cs">
+    <Compile Include="Admin\FormEditUser.Designer.cs">
+      <DependentUpon>FormEditUser.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Authorization\FormLogin.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Authorization\FormLogin.Designer.cs">
       <DependentUpon>FormLogin.cs</DependentUpon>
     </Compile>
-    <Compile Include="FormMyCars.cs">
+    <Compile Include="Admin\FormManageUsers.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FormMyCars.Designer.cs">
+    <Compile Include="Admin\FormManageUsers.Designer.cs">
+      <DependentUpon>FormManageUsers.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MyCar\FormMyCars.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MyCar\FormMyCars.Designer.cs">
       <DependentUpon>FormMyCars.cs</DependentUpon>
     </Compile>
-    <Compile Include="FormRegister.cs">
+    <Compile Include="Authorization\FormRegister.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FormRegister.Designer.cs">
+    <Compile Include="Authorization\FormRegister.Designer.cs">
       <DependentUpon>FormRegister.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="Form1.resx">
+    <EmbeddedResource Include="Car\Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Form3.resx">
+    <EmbeddedResource Include="Menu\Form3.resx">
       <DependentUpon>Form3.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FormCarDetails.resx">
+    <EmbeddedResource Include="Car\FormCarDetails.resx">
       <DependentUpon>FormCarDetails.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FormCars.resx">
+    <EmbeddedResource Include="Car\FormCars.resx">
       <DependentUpon>FormCars.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FormEditCar.resx">
+    <EmbeddedResource Include="MyCar\FormEditCar.resx">
       <DependentUpon>FormEditCar.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FormLogin.resx">
+    <EmbeddedResource Include="Authorization\FormLogin.resx">
       <DependentUpon>FormLogin.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FormMyCars.resx">
+    <EmbeddedResource Include="MyCar\FormMyCars.resx">
       <DependentUpon>FormMyCars.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FormRegister.resx">
+    <EmbeddedResource Include="Authorization\FormRegister.resx">
       <DependentUpon>FormRegister.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -209,5 +221,6 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
